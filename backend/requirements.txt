@@ -1,0 +1,39 @@
+fastapi>=0.115
+uvicorn[standard]>=0.32
+sqlalchemy>=2.0
+pydantic>=2.9
+pydantic-settings>=2.6
+httpx>=0.27
+anthropic>=1.0.0
+PyYAML>=6.0
+rapidfuzz>=3.10
+apscheduler>=3.10
+reportlab>=4.0
+playwright>=1.40
+# Reads the rendered tailored-resume PDF back to check its page count, so
+# render_resume_pdf (app/resume_tailor.py) can shrink and retry until it fits
+# on one page.
+pymupdf>=1.24
+
+# Google Sheets push (app/google_sheets.py) — opt-in, service-account auth
+# only (no OAuth flow/consent screen needed for a self-hosted single-user
+# app; see Settings > Google Sheets Tracking for setup).
+google-api-python-client>=2.100
+google-auth>=2.30
+google-auth-httplib2>=0.2
+
+# python-jobspy's own dependencies, listed here directly (NOT via its
+# "Requires-Dist", which hard-pins NUMPY==1.26.3 — a version with no wheel
+# for Python 3.13+/3.14, so resolving it normally tries to compile numpy from
+# source and fails without a C toolchain). Install python-jobspy itself with
+# --no-deps (see README "Backend" setup) so pip never sees that pin; these
+# cover what it actually imports at runtime.
+pandas>=2.1
+beautifulsoup4>=4.12
+markdownify>=0.13
+regex>=2024.4.28
+requests>=2.31
+tls-client>=1.0.1
+
+pytest>=8.3
+pytest-mock>=3.14

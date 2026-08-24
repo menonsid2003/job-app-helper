@@ -1,0 +1,35 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+
+# Secrets / local config
+.env
+backend/.env
+frontend/.env
+# Holds real PII (name/email/phone) plus, optionally, a reusable signup
+# password for the agent-apply login carve-out — never committed.
+backend/criteria.yaml
+# Google service-account key (Google Sheets push) — real credential file.
+backend/google/*.json
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# Resume (personal data, not checked in)
+backend/resume/base_resume.txt
+backend/resume/base_resume.pdf
+backend/resume/experience_bank.txt
+
+# Runtime/local data — DB, tailored-resume PDFs, agent-apply Chrome profiles
+# (real session cookies) and logs (screenshots of real application
+# submissions), usage-tracking JSON. None of it belongs in version control.
+backend/data/
+
+# Portable Chrome download for the local agent-apply path (~500MB+ of
+# third-party binaries) — never belongs in git; each dev/user downloads
+# their own copy locally if they use that feature.
+chrome/

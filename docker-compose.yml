@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5-20251001}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
+      CAPSOLVER_API_KEY: ${CAPSOLVER_API_KEY:-}
+      DATABASE_URL: sqlite:///./data/job_app_helper.db
+      CORS_ORIGINS: '["http://localhost:5173"]'
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/resume:/app/resume
+      - ./backend/google:/app/google
+      - ./backend/criteria.yaml:/app/criteria.yaml
+    extra_hosts:
+      # Lets OLLAMA_HOST=http://host.docker.internal:... reach an Ollama
+      # server running on the host itself. Docker Desktop (Windows/Mac)
+      # already resolves this on its own; this line is what makes it also
+      # work on Linux, where it doesn't by default.
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

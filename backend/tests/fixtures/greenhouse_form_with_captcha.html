@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Job Application for Test Role</title></head>
+<body>
+  <form id="application_form">
+    <label for="first_name">First Name</label>
+    <input id="first_name" name="first_name" type="text">
+
+    <label for="last_name">Last Name</label>
+    <input id="last_name" name="last_name" type="text">
+
+    <label for="email">Email</label>
+    <input id="email" name="email" type="text">
+
+    <p>Resume</p>
+    <input id="resume" name="resume" type="file">
+
+    <div class="g-recaptcha" data-sitekey="fake-site-key-abc123"></div>
+    <textarea id="g-recaptcha-response" name="g-recaptcha-response" style="display:none;"></textarea>
+
+    <button type="submit" id="submit_btn">Submit application</button>
+  </form>
+  <script>
+    document.getElementById('application_form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.body.innerHTML = '<h1>Thanks for applying! Token was: ' +
+        document.getElementById('g-recaptcha-response').value + '</h1>';
+    });
+  </script>
+</body>
+</html>

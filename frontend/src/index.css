@@ -1,0 +1,756 @@
+:root {
+  /* This stylesheet only defines a light palette. Declaring "light dark" here
+     without an actual dark palette made browsers apply native dark-mode
+     styling to unstyled form controls (e.g. white button text) while our
+     explicit CSS still gave them a white background — white-on-white. */
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* A small, cohesive token set layered over the existing per-component
+     colors below — neutrals with a slight cool lean toward --accent rather
+     than flat grays, one accent used consistently instead of blue only
+     showing up ad hoc in two places. Semantic (good/bad/warn) colors are
+     left as the literal hex values already used throughout this file. */
+  --bg: #f5f6f9;
+  --surface: #ffffff;
+  --surface-2: #eef1f5;
+  --border: #dde2e9;
+  --border-strong: #c5ccd6;
+  --ink: #1b2330;
+  --ink-muted: #5b6572;
+  --accent: #2158a6;
+  --accent-strong: #163f80;
+  --accent-soft: #e8f0fc;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-card: 0 1px 2px rgba(20, 30, 45, 0.06), 0 6px 16px rgba(20, 30, 45, 0.05);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.dashboard {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dashboard-header h1 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+
+button {
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.tabs button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-muted);
+}
+
+.tabs button:hover:not(.active) {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: transparent;
+}
+
+.tabs button.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.jobs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.jobs-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.jobs-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.jobs-table th.sortable:hover {
+  color: #000;
+}
+
+.sort-indicator {
+  font-size: 0.7em;
+  color: #666;
+}
+
+.jobs-table-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.jobs-table-filters .field-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.jobs-table-filters select,
+.jobs-table-filters input[type="text"] {
+  font: inherit;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #1a1a1a;
+}
+
+.filters-clear {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  align-self: flex-end;
+}
+
+.jobs-table-count {
+  align-self: flex-end;
+  font-size: 0.82rem;
+  color: #777;
+  margin-left: auto;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+
+.pagination-controls .field-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagination-controls select {
+  font: inherit;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #1a1a1a;
+}
+
+.pagination-status {
+  color: #666;
+}
+
+.batch-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #eef4ff;
+  border: 1px solid #cfe0fa;
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+
+.row-selected {
+  background: #f5f9ff;
+}
+
+.jobs-table th,
+.jobs-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.reason-cell {
+  max-width: 320px;
+  color: #555;
+  cursor: pointer;
+}
+
+.reason-cell.truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reason-cell.expanded {
+  max-width: 480px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.jobs-table th {
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.score-high {
+  color: #0a7a2f;
+  font-weight: 700;
+}
+
+.score-mid {
+  color: #a06a00;
+  font-weight: 700;
+}
+
+.score-low {
+  color: #999;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.badge-good {
+  background: #e3f7e8;
+  color: #0a7a2f;
+}
+
+.badge-bad {
+  background: #fbe4e4;
+  color: #b3261e;
+}
+
+.badge-neutral {
+  background: #eee;
+  color: #666;
+}
+
+.remote-select {
+  border-radius: 999px;
+  border: none;
+  padding: 2px 22px 2px 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.remote-select-true {
+  background: #e3f7e8;
+  color: #0a7a2f;
+}
+
+.remote-select-false {
+  background: #eee;
+  color: #666;
+}
+
+.remote-select-unknown {
+  background: #eee;
+  color: #999;
+}
+
+.empty-state {
+  color: #777;
+}
+
+.error-banner {
+  background: #fbe4e4;
+  color: #b3261e;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.status-banner {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+
+.usage-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #f4f4f4;
+  color: #333;
+  padding: 6px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+
+.usage-banner-muted {
+  color: #777;
+}
+
+.usage-banner-pill {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.usage-banner-ok {
+  background: #e3f5e8;
+  color: #0a7a2f;
+}
+
+.usage-banner-warn {
+  background: #fdecea;
+  color: #b3261e;
+}
+
+.pipeline-progress {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.pipeline-progress-error {
+  border-color: #f0b4b0;
+  background: #fff6f6;
+}
+
+.pipeline-progress-stopped {
+  border-color: #e0c072;
+  background: #fffaf0;
+}
+
+.pipeline-progress-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.pipeline-progress-counts {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.pipeline-log {
+  margin: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #16181d;
+  color: #d7e0ea;
+  font-family: "SF Mono", Consolas, "Courier New", monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.full-pipeline-panel {
+  margin-bottom: 16px;
+}
+
+.full-pipeline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ApplyRunPanel renders its run/stop button and the (conditional) progress
+   card as siblings — as flex children of the row above, the button sits
+   inline with the score-threshold field and the Discover & Score action,
+   while the progress card is pushed onto its own full-width line below. */
+.full-pipeline-actions .settings-actions {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.full-pipeline-actions .field {
+  margin-bottom: 0;
+}
+
+.full-pipeline-actions .pipeline-progress {
+  flex-basis: 100%;
+  margin-bottom: 0;
+}
+
+.page-tabs {
+  margin-bottom: 20px;
+}
+
+.status-banner.inline,
+.error-banner.inline {
+  display: inline-block;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.action-buttons button {
+  padding: 4px 8px;
+  font-size: 0.78rem;
+}
+
+.action-pursue {
+  border-color: #0a7a2f;
+  color: #0a7a2f;
+}
+
+.action-skip {
+  border-color: #b3261e;
+  color: #b3261e;
+}
+
+.notes-input {
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 160px;
+}
+
+.jobs-table select {
+  font: inherit;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #1a1a1a;
+}
+
+.settings {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.settings fieldset {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.settings legend {
+  font-weight: 600;
+  padding: 0 6px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.field textarea,
+.field input[type="number"] {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: "SF Mono", Consolas, "Courier New", monospace;
+  font-size: 0.82rem;
+  resize: vertical;
+}
+
+.field-checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.field-checkbox input {
+  width: auto;
+}
+
+.field-inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.field-inline input {
+  width: 80px;
+}
+
+.settings details summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.resume-panel {
+  padding: 12px 8px;
+}
+
+.resume-version-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.resume-version-list li {
+  border-top: 1px solid #eee;
+  padding: 8px 0;
+}
+
+.resume-version-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.resume-diff-summary {
+  color: #666;
+}
+
+.resume-correction {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 6px;
+}
+
+.resume-correction textarea {
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  margin-top: 4px;
+}
+
+.resume-correction .settings-actions,
+.resume-correction button {
+  margin-top: 8px;
+}
+
+.resume-diff {
+  margin: 8px 0 0;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #16181d;
+  font-family: "SF Mono", Consolas, "Courier New", monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.diff-line {
+  padding: 0 4px;
+}
+
+.diff-equal {
+  color: #9aa4b2;
+}
+
+.diff-added {
+  color: #7ee08a;
+  background: rgba(46, 160, 67, 0.15);
+}
+
+.diff-removed {
+  color: #f28b82;
+  background: rgba(248, 81, 73, 0.12);
+}
+
+.base-resume-fieldset {
+  margin-bottom: 20px;
+}
+
+.base-resume-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.auto-apply-fieldset {
+  border: 2px solid #e0a030 !important;
+  background: #fffaf0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.auto-apply-fieldset legend {
+  color: #a06a00;
+  font-weight: 700;
+}
+
+.applicant-profile-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 20px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eee0c0;
+}
+
+.field select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  color: #1a1a1a;
+}
+
+.auto-apply-log-table td {
+  vertical-align: top;
+}
+
+.status-submitted {
+  color: #0a7a2f;
+  font-weight: 600;
+}
+
+.status-failed {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.status-unsupported {
+  color: #a06a00;
+  font-weight: 600;
+}

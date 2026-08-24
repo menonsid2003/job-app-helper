@@ -1,0 +1,169 @@
+# Starter criteria template — copy this to criteria.yaml before first run:
+#   cp backend/criteria.example.yaml backend/criteria.yaml
+# criteria.yaml itself is gitignored (it ends up holding your personal
+# applicant_profile), so a copy of this file is what a fresh clone needs.
+#
+# Everything below is also editable from the running app's Settings page —
+# you don't need to hand-edit this file at all once the app is up. This file
+# just seeds sensible, safe-by-default starting values.
+
+role_categories:
+- SWE
+- Full Stack
+- Data Engineer
+target_roles:
+- Software Engineer
+- Full Stack Developer
+- Data Engineer
+locations:
+- Remote
+country_only:
+- US
+seniority:
+- entry
+- junior
+- mid
+salary_min: null
+must_have_keywords: []
+nice_to_have_keywords:
+- Python
+- SQL
+- AWS
+exclude_keywords:
+- senior staff
+- 10+ years
+- intern
+- internship
+- co-op
+exclude_companies: []
+prefer_full_time: true
+work_authorization:
+  exclude_citizenship_required: true
+  exclude_security_clearance_required: true
+  exclude_if_sponsorship_explicitly_refused: true
+  hard_exclude_prefilter_keywords:
+  - must be a u.s. citizen
+  - u.s. citizenship required
+  - security clearance required
+  - active clearance
+  - ts/sci
+  - unable to sponsor
+  - will not sponsor
+  - no sponsorship
+scoring_weights:
+  title_match: 0.3
+  skills_overlap: 0.3
+  location_fit: 0.15
+  seniority_fit: 0.15
+  salary_fit: 0.1
+# Off by default — real applications get submitted with no per-job approval
+# once this is on. Turn on from Settings only after you've read the
+# "Auto-apply" section of README.md and filled in applicant_profile below.
+auto_apply_enabled: false
+gpu_schedule_window: 22:00-07:00
+auto_schedule_enabled: false
+canonical_link_score_threshold: 70
+# Starter list of well-known tech companies with public Greenhouse/Lever
+# boards, so discovery finds something on first run. Add/remove tokens from
+# Settings -> "Target companies to poll", or replace this list entirely for
+# a non-tech field (see README.md's "Setup" section).
+target_companies:
+  greenhouse:
+  - stripe
+  - figma
+  - asana
+  - robinhood
+  - gitlab
+  - coinbase
+  - discord
+  - cloudflare
+  - elastic
+  - databricks
+  lever:
+  - plaid
+  - clari
+  - spotify
+  workday: []
+company_board_connectors_enabled: true
+exclude_location_keywords:
+- india
+- canada
+- united kingdom
+- u.k.
+- ireland
+- germany
+- france
+- australia
+- new zealand
+- japan
+- mexico
+- singapore
+- israel
+- china
+- philippines
+- vietnam
+- thailand
+- indonesia
+- malaysia
+- south korea
+- brazil
+- poland
+- netherlands
+- sweden
+- switzerland
+- dublin
+- london
+- toronto
+- vancouver
+- montreal
+- sydney
+- melbourne
+- tokyo
+- bangalore
+- bengaluru
+- mumbai
+- delhi
+- hyderabad
+- pune
+- berlin
+- munich
+- paris
+- amsterdam
+- emea
+- apac
+- latam
+# Deliberately blank — this holds real personal data used to fill out
+# application forms (and, if you set signup_email/signup_password, a
+# plaintext reusable login for sites that require an account). Fill in from
+# Settings -> Auto-Apply once the app is running; never commit real values
+# here. Auto-apply refuses to run until full_name/email/phone are all set.
+applicant_profile:
+  full_name: ''
+  email: ''
+  phone: ''
+  linkedin_url: ''
+  requires_visa_sponsorship: null
+  city: ''
+  target_role: ''
+  years_of_experience: null
+  salary_expectation: null
+  work_authorization_note: ''
+  signup_email: ''
+  signup_password: ''
+# Off by default. Searches Indeed/LinkedIn/etc. directly (in addition to the
+# target_companies boards above) — see README.md's "Connector coverage"
+# section before enabling.
+jobspy:
+  enabled: false
+  sites:
+  - indeed
+  - linkedin
+  results_wanted: 20
+  hours_old: 72
+  country_indeed: US
+# Off by default. Needs backend/google/service_account.json — see Settings
+# -> "Google Sheets Tracking" in the running app for the one-time setup.
+google_sheets:
+  enabled: false
+  spreadsheet_url: ''
+  sheet_name: ''

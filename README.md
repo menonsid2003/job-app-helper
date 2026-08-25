@@ -1,5 +1,7 @@
 # Job Application Helper
 
+Made this to help me tackle the tediousness of job applications and to get hands on experience in AI assisted development and AI driven applications. 
+
 Self-hosted job discovery + LLM scoring pipeline with a work-authorization-
 and location-aware filter (F1 OPT / H-1B sponsorship + US-only constraints),
 Greenhouse + Lever + Workday connectors, canonical-link resolution, LLM

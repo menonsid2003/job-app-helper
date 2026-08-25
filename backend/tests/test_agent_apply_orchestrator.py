@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from app.apply_agent.orchestrator import run_job
-from app.models import Job, JobStatus, Resume
+from app.apply_agent.orchestrator import _ClaimTable, run_job
+from app.models import Application, ApplicationMethod, ApplicationStatus, Job, JobStatus, Resume
 from app.schemas import ApplicantProfile, CriteriaConfig
 
 
@@ -195,3 +195,61 @@ def test_run_job_writes_transcript_to_worker_log(monkeypatch, job, resume, crite
     log_text = worker_log.read_text(encoding="utf-8")
     assert "Data Engineer" in log_text  # job title in the run header
     assert "Checking the form." in log_text
+
+
+def _make_tailored_job(db_session) -> Job:
+    job = Job(
+        source="greenhouse", source_url="https://example.com/1", canonical_url=None,
+        title="Data Engineer", company="Acme", location="Remote", description="x",
+        status=JobStatus.TAILORED,
+    )
+    db_session.add(job)
+    db_session.commit()
+    db_session.refresh(job)
+    return job
+
+
+def test_claim_table_never_reclaims_a_job_already_attempted_this_run(db_session):
+    """Regression test for the auto-apply crash-loop bug: release() only
+    frees the concurrency guard for other workers, it must not make the job
+    claimable again by the *next* acquire() in the same run — otherwise a
+    job that deterministically fails (bad CAPTCHA, unanswerable question)
+    gets relaunched through a full Chrome + claude-CLI session forever,
+    since a failure alone doesn't change job.status away from TAILORED."""
+    job = _make_tailored_job(db_session)
+    claims = _ClaimTable()
+
+    claimed = claims.acquire(db_session)
+    assert claimed is not None and claimed.id == job.id
+
+    claims.release(job.id)  # worker finished (successfully or not) and freed its slot
+
+    assert claims.acquire(db_session) is None
+
+
+def test_claim_table_skips_job_already_marked_permanently_unsupported(db_session):
+    """A job whose most recent attempt came back UNSUPPORTED (a permanent
+    failure per PERMANENT_FAILURES) must not be picked up by a *later* run
+    either — otherwise every future "Run Agent-Apply" click re-spends a full
+    Chrome + claude-CLI session on something already known to fail."""
+    job = _make_tailored_job(db_session)
+    db_session.add(Application(
+        job_id=job.id, status=ApplicationStatus.UNSUPPORTED, method=ApplicationMethod.AGENT, notes="captcha",
+    ))
+    db_session.commit()
+
+    assert _ClaimTable().acquire(db_session) is None
+
+
+def test_claim_table_still_offers_a_job_whose_last_attempt_only_failed(db_session):
+    """FAILED (as opposed to UNSUPPORTED) means the prior attempt hit
+    something transient — a timeout, a crash — so unlike the permanent case
+    above, a fresh run should still be allowed to try it again."""
+    job = _make_tailored_job(db_session)
+    db_session.add(Application(
+        job_id=job.id, status=ApplicationStatus.FAILED, method=ApplicationMethod.AGENT, notes="timeout",
+    ))
+    db_session.commit()
+
+    claimed = _ClaimTable().acquire(db_session)
+    assert claimed is not None and claimed.id == job.id

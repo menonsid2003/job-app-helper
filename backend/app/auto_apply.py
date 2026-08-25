@@ -56,6 +56,19 @@ def _already_applied(db: Session, job_id: int) -> bool:
     return existing is not None
 
 
+def _permanently_unsupported(db: Session, job_id: int) -> bool:
+    """True once the most recent attempt at this job came back unsupported
+    (unrecognized custom question, no adapter for the platform, etc.) —
+    something a plain retry won't fix. Without this check, every future
+    "Run Auto-Apply" click re-attempts the same known-unsupported jobs from
+    scratch, opening a browser and re-tailoring for nothing. A job stuck
+    this way needs a human to intervene before it's worth trying again."""
+    latest = db.execute(
+        select(Application).where(Application.job_id == job_id).order_by(Application.created_at.desc()).limit(1)
+    ).scalar_one_or_none()
+    return latest is not None and latest.status == ApplicationStatus.UNSUPPORTED
+
+
 def run_auto_apply(
     db: Session,
     criteria: CriteriaConfig,
@@ -86,11 +99,18 @@ def run_auto_apply(
         base_resume_text = None
         tailor_provider = None
 
-    jobs = db.execute(select(Job).where(Job.status.in_(ELIGIBLE_STATUSES))).scalars().all()
-    jobs = [j for j in jobs if not _already_applied(db, j.id)]
+    all_jobs = db.execute(select(Job).where(Job.status.in_(ELIGIBLE_STATUSES))).scalars().all()
+    jobs = [j for j in all_jobs if not _already_applied(db, j.id) and not _permanently_unsupported(db, j.id)]
+    skipped_unsupported = len(all_jobs) - len(jobs)
+
+    if skipped_unsupported:
+        log(
+            f"Skipping {skipped_unsupported} job(s) already marked unsupported on a prior attempt — "
+            "these won't be auto-retried; apply manually via the Tracking table instead."
+        )
 
     if not jobs:
-        log("No pursued jobs are eligible for auto-apply (already applied, or none pursued/tailored).")
+        log("No pursued jobs are eligible for auto-apply (already applied, unsupported, or none pursued/tailored).")
         return []
 
     log(f"Auto-apply: {len(jobs)} eligible job(s).")

@@ -187,6 +187,26 @@ def test_stops_when_should_stop_returns_true(db_session, tmp_path, monkeypatch):
     assert fake_adapter.submit_calls == 0
 
 
+def test_does_not_retry_job_already_marked_unsupported(db_session, tmp_path, monkeypatch):
+    """Regression test: without this skip, every future "Run Auto-Apply"
+    click re-attempts a job that's already known to be unsupported (no
+    adapter, unrecognized question, ...) from scratch — re-tailoring and
+    opening a browser for something that will just fail the same way again."""
+    job = _make_job(db_session, status=JobStatus.PURSUE)
+    _make_resume(db_session, job, tmp_path)
+    db_session.add(Application(job_id=job.id, status=ApplicationStatus.UNSUPPORTED, method=ApplicationMethod.AUTO, notes="no adapter"))
+    db_session.commit()
+
+    fake_adapter = FakeAdapter(ApplicationResult(status="submitted", notes="x"))
+    monkeypatch.setattr("app.auto_apply.default_adapters", lambda: [fake_adapter])
+    criteria = CriteriaConfig(auto_apply_enabled=True, applicant_profile=_complete_profile())
+
+    results = run_auto_apply(db_session, criteria)
+
+    assert results == []
+    assert fake_adapter.submit_calls == 0
+
+
 def test_records_failed_application_on_adapter_exception(db_session, tmp_path, monkeypatch):
     job = _make_job(db_session, status=JobStatus.PURSUE)
     _make_resume(db_session, job, tmp_path)

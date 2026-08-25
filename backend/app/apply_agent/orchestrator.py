@@ -69,6 +69,24 @@ def _already_applied(db: Session, job_id: int) -> bool:
     return existing is not None
 
 
+def _latest_application(db: Session, job_id: int) -> Application | None:
+    return db.execute(
+        select(Application).where(Application.job_id == job_id).order_by(Application.created_at.desc()).limit(1)
+    ).scalar_one_or_none()
+
+
+def _permanently_unsupported(db: Session, job_id: int) -> bool:
+    """True once the most recent attempt at this job was classified as a
+    permanent failure (see PERMANENT_FAILURES) — a CAPTCHA, an expired
+    posting, an unanswerable question, etc. that won't resolve itself on a
+    plain retry. Prevents a later run from immediately re-spending a full
+    Chrome + claude-CLI session on something already known to fail; a job
+    stuck this way needs a human to intervene (answer the question manually,
+    add a CapSolver key, ...) before it's worth trying again."""
+    latest = _latest_application(db, job_id)
+    return latest is not None and latest.status == ApplicationStatus.UNSUPPORTED
+
+
 def _latest_resume(db: Session, job_id: int) -> Resume | None:
     return db.execute(
         select(Resume).where(Resume.job_id == job_id).order_by(Resume.version.desc()).limit(1)
@@ -107,21 +125,35 @@ class _ClaimTable:
     two parallel workers picking up the same job. Not persisted to the DB
     (unlike the reference pipeline's apply_status='in_progress' column) —
     this app's Job model has no such column, and a run lives entirely within
-    one process, so an in-memory set is enough."""
+    one process, so an in-memory set is enough.
+
+    Tracks two separate things: _claimed (currently being worked on right
+    now, freed by release() so another worker can't collide with it) and
+    _attempted (every job any worker has ever picked up this run, never
+    freed). Without _attempted, a job that fails would get released back
+    into the pool and immediately reclaimed by the next free worker —
+    since a failure alone doesn't change job.status away from TAILORED,
+    that's an infinite retry loop against a job that will keep failing the
+    same way, burning a full Chrome + claude-CLI session each time. Each
+    job gets exactly one attempt per run regardless of outcome; a future
+    run (see _permanently_unsupported below) picks up from there."""
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._claimed: set[int] = set()
+        self._attempted: set[int] = set()
 
     def acquire(self, db: Session) -> Job | None:
         with self._lock:
+            exclude = self._claimed | self._attempted
             stmt = select(Job).where(Job.status.in_(ELIGIBLE_STATUSES)).order_by(Job.id)
-            if self._claimed:
-                stmt = stmt.where(Job.id.notin_(self._claimed))
+            if exclude:
+                stmt = stmt.where(Job.id.notin_(exclude))
             for job in db.execute(stmt).scalars().all():
-                if _already_applied(db, job.id):
+                if _already_applied(db, job.id) or _permanently_unsupported(db, job.id):
                     continue
                 self._claimed.add(job.id)
+                self._attempted.add(job.id)
                 return job
             return None
 

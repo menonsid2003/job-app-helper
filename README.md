@@ -1,5 +1,8 @@
 # Job Application Helper
 
+
+Made this to help me tackle the tediousness of job applications and to get hands on experience in AI assisted development and AI driven applications. 
+
 A self-hosted tool that automates the boring parts of a job search: it finds
 postings, scores them against your criteria with an LLM, filters out ones
 that don't match your work authorization or location, and helps you tailor
